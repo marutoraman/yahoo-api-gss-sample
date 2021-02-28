@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Mercari自動出品ツール</title>
+    <link rel="stylesheet" href="./style.css">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-giJF6kkoqNQ00vy+HMDP7azOuL0xtbfIcaT9wjKHr8RbDVddVHyTfAAsrekwKmP1" crossorigin="anonymous">
+  </head>
+  <body>
+    
+    <script type="text/javascript" src="/eel.js"></script>
+
+    <!--入力FORM start-->
+    <form id="form1" action="#">
+      <!--Header part-->
+      <div class="container alert alert-secondary" role="alert">
+
+        <div class="row">
+          <div class="col">
+            <table>
+              <!--タイトル-->
+              <tr>
+                <!--// background: url(../../image/1.1.0/img_twenty_logo.png) no-repeat 0 0; -->
+                <td colspan="3"><h6><u>PassMarket購入ツール</u></h6></td>
+              </tr>
+              <tr>
+                <td>URL:</td>
+                <td><input type="text" id="url_input"></td>
+                <td><button type="button" id="start" class="btn btn-success">DL</button></td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+    </form>
+
+    <script type="text/javascript">
+      start.addEventListener("click", () => {
+        var url = url_input.value;
+        eel.start(url);
+      });
+
+      eel.expose(show_log);
+      function show_log(log) {
+        log_area.value += log + "\n";
+      };
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
+  </body>
+</html>

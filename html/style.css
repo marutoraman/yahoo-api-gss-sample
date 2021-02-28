@@ -1,0 +1,20 @@
+textarea[readonly] {
+    margin: 0;
+    padding: 0;
+    background: none;
+    border: none;
+    border-radius: 0;
+    outline: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+  }
+
+.log_textArea {
+    height: 400px;
+    width: 600px
+}
+
+.log_bottom_table {
+    width: 600px
+}
