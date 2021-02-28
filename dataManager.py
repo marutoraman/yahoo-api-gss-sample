@@ -110,7 +110,7 @@ def get_item_info(datum):
     image_file_name = datum[0]
     title = datum[1]
     detail_type = datum[2]
-    detail = make_item_detail(detail_type, datum)
+    detail = make_item_detail(datum)
     category = category_to_int(datum[4])
     brand = datum[5]
     status = status_to_int(datum[6])
