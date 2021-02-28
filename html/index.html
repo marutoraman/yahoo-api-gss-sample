@@ -10,9 +10,15 @@
   <body>
     
     <script type="text/javascript" src="/eel.js"></script>
+    <script type="text/javascript">
+      window.onload = function() {
+        eel.load_spreadsheet_list();
+      };
+    </script>
+
 
     <!--入力FORM start-->
-    <form id="form1" action="#">
+    <form id="form1" action="#" name="input_form">
       <!--Header part-->
       <div class="container alert alert-secondary" role="alert">
 
@@ -22,11 +28,14 @@
               <!--タイトル-->
               <tr>
                 <!--// background: url(../../image/1.1.0/img_twenty_logo.png) no-repeat 0 0; -->
-                <td colspan="3"><h6><u>PassMarket購入ツール</u></h6></td>
+                <td colspan="3"><h6><u>Mercari自動出品ツール</u></h6></td>
               </tr>
               <tr>
                 <td>URL:</td>
-                <td><input type="text" id="url_input"></td>
+                <td>
+                  <select name="spreadsheet" id="gss">
+                  </select>
+                </td>
                 <td><button type="button" id="start" class="btn btn-success">DL</button></td>
               </tr>
             </table>
@@ -37,13 +46,24 @@
 
     <script type="text/javascript">
       start.addEventListener("click", () => {
-        var url = url_input.value;
-        eel.start(url);
+        const spreadsheet_selector = document.input_form.spreadsheet;
+        var spreadsheet_name_index = spreadsheet_selector.selectedIndex;
+        var spreadsheet_name = spreadsheet_selector.options[spreadsheet_name_index].value; 
+        eel.start(spreadsheet_name);
       });
 
       eel.expose(show_log);
       function show_log(log) {
         log_area.value += log + "\n";
+      };
+
+      eel.expose(add_option);
+      function add_option(name) {
+        var selector = document.getElementById("gss");
+        var option = document.createElement("option");
+        option.text = name;
+        option.value = name;
+        selector.add(option);
       };
 
     </script>
