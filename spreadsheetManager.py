@@ -11,10 +11,10 @@ FILE = 'testspreadsheet'
 
 ## _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
-def connect_to(jsonKey, file, sheet):
+def connect_to(jsonKey, file, sheet_no):
     credentials = ServiceAccountCredentials.from_json_keyfile_name(jsonKey, SCOPE)
     gs = gspread.authorize(credentials)
-    worksheet = gs.open(file).get_worksheet(sheet)
+    worksheet = gs.open(file).get_worksheet(sheet_no)
     return worksheet
 
 ## _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
@@ -137,9 +137,6 @@ def fetch_allData(worksheet):
 # main処理
 def main():
     print("main")
-    workSheet1 = connect_to(JSONKEY, FILE, 0)
-    data = fetch_allData(workSheet1)
-    print(data)
 
 # 直接起動された場合はmain()を起動(モジュールとして呼び出された場合は起動しないようにするため)
 if __name__ == "__main__":
