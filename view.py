@@ -14,8 +14,10 @@ def load_spreadsheet_list():
         eel.add_option(spreadsheet[0])
 
 @ eel.expose
-def start(url):
+def start(url, start_time, interval_time):
     print("start button pressed")
+    print(start_time) # YYYY-mm-ddTHH:MM
+    print(interval_time) # XX:XX
     # 変数設定
     JSONKEY = 'testspreadsheet-302003-fb8fe37d15e6.json'
 
