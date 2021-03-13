@@ -22,26 +22,40 @@ def start(url: str):
 
     # google spreadsheetに接続・データ抽出
     sheet = spreadsheetManager.connect_to(JSONKEY, url, 0)
-    data = spreadsheetManager.fetch_allData(sheet)
+    sheet_data = spreadsheetManager.fetch_allData(sheet)
 
-    # まずはログイン
-    mercari.login()
+    # headerとdataを分離する
+    header = sheet_data[0]
+    data = sheet_data[1:]
+
+    # ログインは不要
+    mercari.start()
     
     # 抽出データの処理
-    for datum in data:
+    for row, datum in enumerate(data):
+        print('datum:', datum)
         mercari.go_to_sell_page()
 
-        item_info = dataManager.get_item_info(datum)
-        delivery_info = dataManager.get_delivery_info(datum)
+        item_info = dataManager.get_dummy_item_info() # get_item_info(datum)
+        delivery_info = dataManager.get_dummy_shippment_info() # get_delivery_info(datum)
+
+        ## 出品時間を決めたいならここにタイマー
 
         ## 処理的なもの 出品 / 値下げ / 取下げ の条件分岐をここで datumにitemの状態(mercari_status)を表す値必要
+        mercari.sell_item(item_info, delivery_info)
+        mercari.send_input()
+
+        if row != len(data) - 1:
+            print("続けて出品するよ")
+            mercari.continue_sell()
 
         ## timer的なものがあるなら、ここに記述し、タイミングを図る
 
-        mercari.sell_item(item_info, delivery_info)
+        if row == 1:
+            break
 
     # ブラウザを閉じて終了
-    mercari.close()
+    # mercari.close()
 
 
 desktop.start(app_name,end_point,size)
