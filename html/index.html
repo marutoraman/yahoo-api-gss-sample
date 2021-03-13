@@ -36,7 +36,22 @@
                   <select name="spreadsheet" id="gss">
                   </select>
                 </td>
-                <td><button type="button" id="start" class="btn btn-success">DL</button></td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>出品開始時間:</td>
+                <td>
+                  <input type="datetime-local" id="start_time_input">
+                </td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>出品間隔:</td>
+                <td>
+                  <input type="time" id="interval_time_input">
+                  </select>
+                </td>
+                <td><button type="button" id="start" class="btn btn-success">スタート</button></td>
               </tr>
             </table>
           </div>
@@ -49,7 +64,9 @@
         const spreadsheet_selector = document.input_form.spreadsheet;
         var spreadsheet_name_index = spreadsheet_selector.selectedIndex;
         var spreadsheet_name = spreadsheet_selector.options[spreadsheet_name_index].value; 
-        eel.start(spreadsheet_name);
+        var start_time = start_time_input.value;
+        var interval_time = interval_time_input.value;
+        eel.start(spreadsheet_name, start_time, interval_time);
       });
 
       eel.expose(show_log);
