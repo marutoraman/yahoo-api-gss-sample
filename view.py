@@ -1,4 +1,5 @@
-import eel, desktop
+import eel, desktop, time
+from datetime import datetime as dt
 import spreadsheetManager, dataManager, fileManager
 import mercari
 
@@ -15,13 +16,16 @@ def load_spreadsheet_list():
         eel.add_option(spreadsheet[0])
 
 @ eel.expose
-def start(url: str):
+def start(spreadsheet_number: int, start_time: str, interval_time: str):
     print("start button pressed")
+
     # 変数設定
-    JSONKEY = 'testspreadsheet-302003-fb8fe37d15e6.json'
+    spreadsheet_list = fileManager.read_csv_file("spreadsheet_list.csv")
+    URL = spreadsheet_list[spreadsheet_number][0]
+    JSONKEY = spreadsheet_list[spreadsheet_number][1]
 
     # google spreadsheetに接続・データ抽出
-    sheet = spreadsheetManager.connect_to(JSONKEY, url, 0)
+    sheet = spreadsheetManager.connect_to(JSONKEY, URL, 0)
     sheet_data = spreadsheetManager.fetch_allData(sheet)
 
     # headerとdataを分離する
@@ -31,6 +35,18 @@ def start(url: str):
     # ログインは不要
     mercari.start()
     
+    # 開始時間設定
+    if len(start_time) != 0: # YYYY-mm-ddTHH:MM
+        trigger_time = dt.strptime(start_time, "%Y-%m-%dT%H:%M")
+        while True:
+            left_time = trigger_time - dt.now()
+            print(f"出品開始まで ... {left_time}")
+            if float(left_time.total_seconds()) < 0.0:
+                print("時間になったので、出品処理を開始します。")
+                break
+            else:
+                time.sleep(1)
+
     # 抽出データの処理
     for row, datum in enumerate(data):
         print('datum:', datum)
@@ -46,11 +62,19 @@ def start(url: str):
         mercari.send_input()
 
         if row != len(data) - 1:
-            print("続けて出品するよ")
+            # 出品時間間隔の設定
+            if len(interval_time) > 0:
+                wait_time_component = interval_time.split(":")
+                minutes = int(wait_time_component[0])
+                seconds = int(wait_time_component[1])
+                total_wait_seconds = minutes * 60 + seconds 
+                print(f"次の出品まで {total_wait_seconds} 秒待つよ")
+                time.sleep(total_wait_seconds)
+            print("出品時間になったので、次の出品へ")
+            
             mercari.continue_sell()
 
-        ## timer的なものがあるなら、ここに記述し、タイミングを図る
-
+        # DEBUG設定
         if row == 1:
             break
 
