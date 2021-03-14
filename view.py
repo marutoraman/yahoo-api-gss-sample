@@ -16,7 +16,7 @@ def load_spreadsheet_list():
         eel.add_option(spreadsheet[0])
 
 @ eel.expose
-def start(url: str):
+def start(spreadsheet_number: int, start_time: str, interval_time: str):
     print("start button pressed")
     # 変数設定
     spreadsheet_list = fileManager.read_csv_file("spreadsheet_list.csv")
@@ -34,6 +34,18 @@ def start(url: str):
     # ログインは不要
     mercari.start()
     
+    # 開始時間設定
+    if len(start_time) != 0: # YYYY-mm-ddTHH:MM
+        trigger_time = dt.strptime(start_time, "%Y-%m-%dT%H:%M")
+        while True:
+            left_time = trigger_time - dt.now()
+            print(f"出品開始まで ... {left_time}")
+            if float(left_time.total_seconds()) < 0.0:
+                print("時間になったので、出品処理を開始します。")
+                break
+            else:
+                time.sleep(1)
+
     # 抽出データの処理
     for row, datum in enumerate(data):
         print('datum:', datum)
