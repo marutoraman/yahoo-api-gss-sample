@@ -18,10 +18,12 @@ def load_spreadsheet_list():
 def start(url: str):
     print("start button pressed")
     # 変数設定
-    JSONKEY = 'testspreadsheet-302003-fb8fe37d15e6.json'
+    spreadsheet_list = fileManager.read_csv_file("spreadsheet_list.csv")
+    URL = spreadsheet_list[spreadsheet_number][0]
+    JSONKEY = spreadsheet_list[spreadsheet_number][1]
 
     # google spreadsheetに接続・データ抽出
-    sheet = spreadsheetManager.connect_to(JSONKEY, url, 0)
+    sheet = spreadsheetManager.connect_to(JSONKEY, URL, 0)
     sheet_data = spreadsheetManager.fetch_allData(sheet)
 
     # headerとdataを分離する
