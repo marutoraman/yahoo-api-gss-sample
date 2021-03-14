@@ -18,6 +18,7 @@ def load_spreadsheet_list():
 @ eel.expose
 def start(spreadsheet_number: int, start_time: str, interval_time: str):
     print("start button pressed")
+
     # 変数設定
     spreadsheet_list = fileManager.read_csv_file("spreadsheet_list.csv")
     URL = spreadsheet_list[spreadsheet_number][0]
