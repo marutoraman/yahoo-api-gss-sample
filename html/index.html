@@ -62,11 +62,10 @@
     <script type="text/javascript">
       start.addEventListener("click", () => {
         const spreadsheet_selector = document.input_form.spreadsheet;
-        var spreadsheet_name_index = spreadsheet_selector.selectedIndex;
-        var spreadsheet_name = spreadsheet_selector.options[spreadsheet_name_index].value; 
+        var spreadsheet_index = spreadsheet_selector.selectedIndex;
         var start_time = start_time_input.value;
         var interval_time = interval_time_input.value;
-        eel.start(spreadsheet_name, start_time, interval_time);
+        eel.start(spreadsheet_index, start_time, interval_time);
       });
 
       eel.expose(show_log);
