@@ -91,16 +91,12 @@ def make_item_detail(spreadsheet_number:int, header:list, datum:list):
     FILE = spreadsheet_list[spreadsheet_number][0]
     JSONKEY = spreadsheet_list[spreadsheet_number][1]
     TEMPLATE_SHEET_NUMBER = 2
+    # templateが複数ある場合、template_typeで変数を分岐
     # type = datum[]
     # if type == 0:
-    #     file = ""
     #     sheet_no = 0
     # elif type == 1:
-    #     file = ""
     #     sheet_no = 0
-    
-    file = FILE
-    sheet_no = 2
 
     # templateのDL
     template_sheet = spreadsheetManager.connect_to(JSONKEY, FILE, TEMPLATE_SHEET_NUMBER)
