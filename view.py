@@ -61,11 +61,19 @@ def start(spreadsheet_number: int, start_time: str, interval_time: str):
         mercari.send_input()
 
         if row != len(data) - 1:
-            print("続けて出品するよ")
+            # 出品時間間隔の設定
+            if len(interval_time) > 0:
+                wait_time_component = interval_time.split(":")
+                minutes = int(wait_time_component[0])
+                seconds = int(wait_time_component[1])
+                total_wait_seconds = minutes * 60 + seconds 
+                print(f"次の出品まで {total_wait_seconds} 秒待つよ")
+                time.sleep(total_wait_seconds)
+            print("出品時間になったので、次の出品へ")
+            
             mercari.continue_sell()
 
-        ## timer的なものがあるなら、ここに記述し、タイミングを図る
-
+        # DEBUG設定
         if row == 1:
             break
 
