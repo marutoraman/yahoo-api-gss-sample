@@ -106,15 +106,13 @@ def make_item_detail(spreadsheet_number:int, header:list, datum:list):
     template_sheet = spreadsheetManager.connect_to(JSONKEY, FILE, TEMPLATE_SHEET_NUMBER)
     template = spreadsheetManager.fetch_allData(template_sheet)
 
-    # DLしたtemplateから 使用されている $変数$ をlistで抽出
+    # 各header, datum回しtemplateを置換
+    detail = template
+    for head, item in zip(header, datum):
+        key = "$" + head + "$"
+        if key in template:
+            detail = template.replace(key, item)
 
-
-    # その$変数$に対する商品の値を取得
-
-    # 取得した値を置換
-
-    # detailに代入し、return
-    detail = ""
     return detail
 
 # _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
