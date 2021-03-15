@@ -51,7 +51,8 @@
                   <input type="time" id="interval_time_input" value="00:00">
                   </select>
                 </td>
-                <td><button type="button" id="start" class="btn btn-success">スタート</button></td>
+                <td><button type="button" id="sell" class="btn btn-success">出品</button></td>
+              </tr>
               </tr>
             </table>
           </div>
@@ -60,7 +61,7 @@
     </form>
 
     <script type="text/javascript">
-      start.addEventListener("click", () => {
+      sell.addEventListener("click", () => {
         const spreadsheet_selector = document.input_form.spreadsheet;
         var spreadsheet_index = spreadsheet_selector.selectedIndex;
         var start_time = start_time_input.value;
