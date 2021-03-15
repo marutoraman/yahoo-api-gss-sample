@@ -81,5 +81,17 @@ def start(spreadsheet_number: int, start_time: str, interval_time: str):
     # ブラウザを閉じて終了
     # mercari.close()
 
+@ eel.expose
+def reSell(elapsed_date: str):
+    if not elapsed_date.isdecimal():
+        print(f"入力値: {elapsed_date} は数値ではありません")
+        return
+    elif int(elapsed_date) == 0:
+        print(f"入力値が [0] なので、何もしません")
+        return
+
+    mercari.start()
+    mercari.refresh_item_list()
+
 
 desktop.start(app_name,end_point,size)

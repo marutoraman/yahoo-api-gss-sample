@@ -1,17 +1,19 @@
 import os, glob, time
+import datetime as dt
 from dataManager import Item_Info, Shipping_Info
 import driverManager
 from selenium.webdriver.support.select import Select
 
-URL = "https://www.mercari.com/jp/"
+TOP = "https://www.mercari.com/jp/"
 SELL_URL = "https://www.mercari.com/jp/sell"
+SELLING_URL = "https://www.mercari.com/jp/mypage/listings/listing/"
 
 # _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 def start():
     global driver
     driver = driverManager.start_driver()
-    driver = driverManager.open_page(driver, URL)
+    driver = driverManager.open_page(driver, TOP)
 
 def login():
     global driver
@@ -24,9 +26,21 @@ def close():
 
 # _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
+def move_to_top():
+    global driver
+    driver = driverManager.open_page(driver, TOP)
+
+def move_to_url(url: str):
+    global driver
+    driver = driverManager.open_page(driver, url)
+
 def go_to_sell_page():
     global driver
     driver = driverManager.open_page(driver, SELL_URL)
+
+def go_to_selling_page():
+    global driver
+    driver = driverManager.open_page(driver, SELLING_URL)
 
 # _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
@@ -106,6 +120,55 @@ def sell_item(item_info: Item_Info, shipping_info: Shipping_Info):
     set_item(item_info)
     set_delivery(shipping_info)
     set_price(item_info.price)
+
+
+# _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+# _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+# _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+def get_selling_list():
+    global driver
+    list_ul = driver.find_element_by_xpath("//ul[contains(@id, 'mypage-tab-transaction-now') and contains(@class, 'mypage-item-list')]")
+    selling_list = list_ul.find_elements_by_tag_name("li")
+    selling_items_url_list = []
+    for item in selling_list:
+        url = item.find_element_by_tag_name("a").get_attribute("href")
+        print(url)
+        selling_items_url_list.append(url)
+    return selling_items_url_list
+
+def delete_item(url):
+    move_to_url(url)
+    global driver
+    delete_button = driver.find_element_by_xpath("//button[@data-modal='delete-item']")
+    delete_button.click()
+    print("a")
+    # '削除する'要素が2個ある
+    confirm_button = driver.find_elements_by_xpath("//button[contains(@type, 'submit') and contains(text(), '削除する')]")
+    time.sleep(1)
+    confirm_button[1].click()
+
+def refresh_item_list(elapsed_date):
+    # 日付処理
+    border_date = dt.datetime.now() - dt.timedelta(days=elapsed_date)
+
+    # 古い日付のアイテムのリストを取得(google spreadsheet？)
+    # old_list = 
+
+    # メルカリ上の出品リストを取得
+    current_sell_list = get_selling_list()
+
+    # 照合
+    matched_list = []
+
+    # 一致する場合は削除へ
+    for item in matched_list:
+        delete_item(item)
+
+    # 一度Topに戻る
+    move_to_top()
+
+    # 再度アップロード
 
 
 # main処理
