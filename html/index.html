@@ -53,6 +53,26 @@
                 </td>
                 <td><button type="button" id="sell" class="btn btn-success">出品</button></td>
               </tr>
+
+              <tr>
+                <td colspan=3><hr></td>
+              </tr>
+
+              <tr>
+                <td>経過日数:</td>
+                <td>
+                  <input type="text" id="elapsed_date_input" value="0">
+                  </select>
+                </td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>再出品間隔:</td>
+                <td>
+                  <input type="time" id="resell_interval_time_input" value="00:00">
+                  </select>
+                </td>
+                <td><button type="button" id="reSell" class="btn btn-success">再出品</button></td>
               </tr>
             </table>
           </div>
@@ -67,6 +87,11 @@
         var start_time = start_time_input.value;
         var interval_time = interval_time_input.value;
         eel.start(spreadsheet_index, start_time, interval_time);
+      });
+
+      reSell.addEventListener("click", () => {
+        var elapsed_date = elapsed_date_input.value;
+        eel.reSell(elapsed_date);
       });
 
       eel.expose(show_log);
