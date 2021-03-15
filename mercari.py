@@ -3,7 +3,7 @@ from dataManager import Item_Info, Shipping_Info
 import driverManager
 from selenium.webdriver.support.select import Select
 
-URL = "https://www.mercari.com/jp/"
+TOP = "https://www.mercari.com/jp/"
 SELL_URL = "https://www.mercari.com/jp/sell"
 
 # _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
@@ -11,7 +11,7 @@ SELL_URL = "https://www.mercari.com/jp/sell"
 def start():
     global driver
     driver = driverManager.start_driver()
-    driver = driverManager.open_page(driver, URL)
+    driver = driverManager.open_page(driver, TOP)
 
 def login():
     global driver
@@ -23,6 +23,10 @@ def close():
     driverManager.quit_driver(driver)
 
 # _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+def move_to_top():
+    global driver
+    driver = driverManager.open_page(driver, TOP)
 
 def go_to_sell_page():
     global driver
