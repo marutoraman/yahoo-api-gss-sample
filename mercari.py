@@ -1,10 +1,12 @@
 import os, glob, time
+import datetime as dt
 from dataManager import Item_Info, Shipping_Info
 import driverManager
 from selenium.webdriver.support.select import Select
 
 TOP = "https://www.mercari.com/jp/"
 SELL_URL = "https://www.mercari.com/jp/sell"
+SELLING_URL = "https://www.mercari.com/jp/mypage/listings/listing/"
 
 # _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
