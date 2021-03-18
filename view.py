@@ -10,7 +10,7 @@ size=(800,600)
 @ eel.expose
 def load_spreadsheet_list():
     file = 'spreadsheet_list.csv'
-    spreadsheets = fileManager.read_csv_file(file)
+    spreadsheets = fileManager.read_csv(file)
     option_list = []
     for spreadsheet in spreadsheets:
         eel.add_option(spreadsheet[0])
@@ -20,7 +20,7 @@ def start(spreadsheet_number: int, start_time: str, interval_time: str):
     print("start button pressed")
 
     # 変数設定
-    spreadsheet_list = fileManager.read_csv_file("spreadsheet_list.csv")
+    spreadsheet_list = fileManager.read_csv("spreadsheet_list.csv")
     URL = spreadsheet_list[spreadsheet_number][0]
     JSONKEY = spreadsheet_list[spreadsheet_number][1]
 
