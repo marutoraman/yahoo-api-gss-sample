@@ -34,6 +34,8 @@ def start(spreadsheet_number: int, start_time: str, interval_time: str):
 
     # ログインは不要
     mercari.start()
+
+    mercari.check_status()
     
     # 開始時間設定
     if len(start_time) != 0: # YYYY-mm-ddTHH:MM

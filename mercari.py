@@ -24,6 +24,20 @@ def close():
     driverManager.close_driver(driver)
     driverManager.quit_driver(driver)
 
+
+# _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+
+def check_status():
+    global driver
+    move_to_url(SELL_URL)
+    while True:
+        if driver.current_url == SELL_URL:
+            print("SELL_URLに移動できたのでループ終了")
+            break
+        else:
+            print("SELL_URLではないので、5秒待機し、再度urlを確認")
+            time.sleep(5)
+
 # _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 def move_to_top():
