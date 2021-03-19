@@ -55,12 +55,17 @@ def start(spreadsheet_number: int, start_time: str, interval_time: str):
         print('datum:', datum)
         mercari.go_to_sell_page()
 
-        item_info = dataManager.get_dummy_item_info() # get_item_info(datum)
-        delivery_info = dataManager.get_dummy_shippment_info() # get_delivery_info(datum)
+        # DEBUG
+        item_info = dataManager.get_dummy_item_info(2, header, datum)
+        delivery_info = dataManager.get_dummy_shippment_info()
 
-        ## 出品時間を決めたいならここにタイマー
+        # 本番用データ
+        # item_info = dataManager.get_item_info(2, header, datum)
+        # delivery_info = dataManager.get_delivery_info(datum)
 
-        ## 処理的なもの 出品 / 値下げ / 取下げ の条件分岐をここで datumにitemの状態(mercari_status)を表す値必要
+        ## 各出品時間を決めたいならここにタイマー
+
+        ## 処理(出品する)
         mercari.sell_item(item_info, delivery_info)
         mercari.send_input()
 
