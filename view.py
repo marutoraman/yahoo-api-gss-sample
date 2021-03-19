@@ -35,6 +35,7 @@ def start(spreadsheet_number: int, start_time: str, interval_time: str):
     # ログインは不要
     mercari.start()
 
+    # 初回ログイン用にURL判別
     mercari.check_status()
     
     # 開始時間設定
@@ -81,7 +82,7 @@ def start(spreadsheet_number: int, start_time: str, interval_time: str):
             break
 
     # ブラウザを閉じて終了
-    # mercari.close()
+    mercari.close()
 
 @ eel.expose
 def reSell(elapsed_date: str):
