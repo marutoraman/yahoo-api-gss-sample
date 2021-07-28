@@ -1,6 +1,8 @@
 from io import open_code
 import os
+import time
 from selenium.webdriver import Chrome, ChromeOptions
+from webdriver_manager.chrome import ChromeDriverManager
 
 # _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
@@ -15,13 +17,12 @@ def set_options():
         '--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.116 Safari/537.36')
     options.add_argument('--ignore-certificate-errors')
     options.add_argument('--ignore-ssl-errors')
-    options.add_argument('--user-data-dir=profile')
-    options.add_experimental_option("detach", True)
+    options.add_argument('--user-data-dir=' + os.path.join(os.getcwd(),"profile"))
     return options
 
 def start_driver():
     options = set_options()
-    return Chrome(executable_path=os.getcwd() + "/" + DRIVER_NAME, options=options)
+    return Chrome(ChromeDriverManager().install(), options=options)
 
 def open_page(driver, url):
     print(f" ... going to open page [{url}]")
@@ -37,6 +38,13 @@ def quit_driver(driver):
 def get_url(driver):
     url = driver.current_url
     return url
+
+def wait_for_url(driver,url):
+    while True:
+        if driver.current_url == url:
+            break
+        print(f"次のURLが表示されるまで待機します:{url}")
+        time.sleep(1)
 
 # main処理
 def main():

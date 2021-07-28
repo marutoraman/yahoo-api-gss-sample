@@ -1,5 +1,7 @@
+import os
 import dataclasses
 import spreadsheetManager, fileManager
+import pandas
 
 MAIN_CATEGORY_LIST = ["選択してください", "レディース", "メンズ", "ベビー・キッズ", "インテリア・住まい・小物", "本・音楽・ゲーム", "おもちゃ・ホビー・グッズ", "コスメ・香水・美容", "家電・スマホ・カメラ",  "スポーツ・レジャー", "ハンドメイド", "チケット", "自動車・オートバイ", "その他"]
 SUB_CATEGORY_LIST = []
@@ -20,7 +22,7 @@ class Item_Info:
     category_detail: int
     size: int
     brand: str # 非必須
-    status: int 
+    status: str 
     price: int
     discount_rate: float
     discount_limit: int
@@ -84,31 +86,19 @@ def shipment_to_int(shipment):
 # _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 ## 今回の肝！！！
-def make_item_detail(spreadsheet_number:int, header:list, datum:list):
-    
-    # 変数設定
-    spreadsheet_list = fileManager.read_csv_file("spreadsheet_list.csv")
-    FILE = spreadsheet_list[spreadsheet_number][0]
-    JSONKEY = spreadsheet_list[spreadsheet_number][1]
-    TEMPLATE_SHEET_NUMBER = 2
-    # templateが複数ある場合、template_typeで変数を分岐
-    # type = datum[]
-    # if type == 0:
-    #     sheet_no = 0
-    # elif type == 1:
-    #     sheet_no = 0
+def make_item_detail(sheet_id:str, spreadsheet_number:int, header:list, datum:list):
 
     # templateのDL
-    template_sheet = spreadsheetManager.connect_to(JSONKEY, FILE, TEMPLATE_SHEET_NUMBER)
+    #template_sheet = spreadsheetManager.connect_to(JSONKEY, FILE, TEMPLATE_SHEET_NUMBER)
+    template_sheet = spreadsheetManager.connect_to_sheetname(sheet_id, "template")
     template = spreadsheetManager.fetch_allData(template_sheet)
 
     # 各header, datum回しtemplateを置換
-    detail = template
+    _t = [t[0] for t in template]
+    detail = "\n".join(_t)
     for head, item in zip(header, datum):
-        key = "$" + head + "$"
-        if key in template:
-            detail = template.replace(key, item)
-
+        detail = detail.replace(f"${head}$", item)
+        
     return detail
 
 # _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
@@ -122,28 +112,33 @@ def make_item_detail(spreadsheet_number:int, header:list, datum:list):
     # 30:売却, 31:販 路, 32:発送状況, 33:取引完了日, 34:売上額
     # 35:備考, 36:純利益
 
-def get_item_info(spreadsheet_number:int, header:list, datum:list):
-    image_file_name = datum[0]
-    title = datum[1]
-    detail_type = datum[2]
-    detail = make_item_detail(spreadsheet_number, header, datum)
-    main_category = category_to_int(datum[4])
-    sub_category = category_to_int(datum[4])
-    category_detail = category_to_int(datum[4])
-    size = datum[5]
-    brand = datum[5]
-    status = status_to_int(datum[6])
-    price = datum[7]
-    discount_rate = datum[8]
-    discount_limit = datum[9]
+def get_item_info(sheet_id:str, spreadsheet_number:int, header:list, datum:pandas.core.series.Series):
+    image_file_name = datum["ID"]
+    title = datum["タイトル"]
+    #detail_type = datum["タイプ"]
+    detail = make_item_detail(sheet_id, spreadsheet_number, header, datum)
+    main_category = datum["カテゴリ1"]
+    sub_category = datum["カテゴリ2"]
+    category_detail = datum["カテゴリ3"]
+    # サイズは任意
+    try:
+        size = datum["日本サイズ１"]
+    except:
+        size = None
+    print(size)
+    brand = datum["ブランド1"]
+    status = datum["メルカリ商品状態"]
+    price = datum["出品開始金額"]
+    discount_rate = 0 #datum[8]
+    discount_limit = 0 #datum[9]
     item_info = Item_Info(image_file_name, title, detail, main_category, sub_category, category_detail, size, brand, status, price, discount_rate, discount_limit)
     return item_info
 
-def get_delivery_info(datum):
-    payer = datum[10]
-    method = datum[11]
-    send_Area = datum[11]
-    shipment_period = datum[12]
+def get_delivery_info(datum:pandas.core.series.Series):
+    payer = datum["配送料の負担"][0]
+    method = datum["配送の方法"][0]
+    send_Area = datum["発送元の地域"][0]
+    shipment_period = datum["発送までの日数"][0]
     delivery_info = Shipping_Info(payer, method, send_Area, shipment_period)
     return delivery_info
 

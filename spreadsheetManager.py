@@ -1,20 +1,31 @@
 import csv
 import gspread, itertools
 from datetime import datetime as dt
+from gspread.models import Worksheet
 from oauth2client.service_account import ServiceAccountCredentials
+import pandas as pd
+
+from common.logger import set_logger
+logger= set_logger(__name__)
 
 SCOPE = ['https://spreadsheets.google.com/feeds',
          'https://www.googleapis.com/auth/drive']
 
-JSONKEY = 'testspreadsheet-302003-fb8fe37d15e6.json'
-FILE = 'testspreadsheet'
+#JSONKEY = 'testspreadsheet-302003-fb8fe37d15e6.json'
+JSONKEY = 'secrets/cred_spreadsheet.json'
 
 ## _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
-def connect_to(jsonKey, file, sheet_no):
-    credentials = ServiceAccountCredentials.from_json_keyfile_name(jsonKey, SCOPE)
+def connect_to(file, sheet_no):
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(JSONKEY, gspread.auth.DEFAULT_SCOPES)
     gs = gspread.authorize(credentials)
     worksheet = gs.open(file).get_worksheet(sheet_no)
+    return worksheet
+
+def connect_to_sheetname(file_id, sheet_name):
+    credentials = ServiceAccountCredentials.from_json_keyfile_name(JSONKEY, gspread.auth.DEFAULT_SCOPES)
+    gs = gspread.authorize(credentials)
+    worksheet = gs.open_by_key(file_id).worksheet(sheet_name)
     return worksheet
 
 ## _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
@@ -32,6 +43,13 @@ def write(sheet, area, data):
         cell_list[i].value = value
     sheet.update_cells(cell_list)
 
+def write_to_column_from_df(sheet:Worksheet,column_name:str, df_data:pd.DataFrame,row:int,value:str):
+    try:
+        col = df_data.columns.get_loc(column_name)
+        sheet.update_cell(row + 1,col + 1,value)
+    except Exception as e:
+        logger.error(f"スプレッドシート書き込みエラー:{e}")
+        
 ## _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 def now_time():
@@ -51,93 +69,85 @@ def calculate_area(row, data):
 ## _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
 
 def fetch_allData(worksheet):
-    data = worksheet.get_all_values()
-    return data
+    try:
+        data = worksheet.get_all_values() # セルに数式が埋め込まれている場合は数式を計算した結果を取得
+        return data
+    except Exception as e:
+        if e.args[0].get('code') == 429:
+            raise Exception("スプレッドシート更新回数の上限です")
 
-# ## _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+        
+def bulk_update_row(worksheet, datas:list, begin_row:int):
+    '''
+    listを指定してスプレッドシートを一括更新
+    '''
+    header = init_fetch_sheet_header(worksheet)
+    cells = worksheet.range(begin_row, 1, len(datas) + begin_row -1 , len(header))
+    for row,data in enumerate(datas):
+        for k,v in data.items():
+            try:
+                col = header.index(k)
+                num = row*(len(header)) + col # 複数行にまたがるデータの場合でも１次元配列に格納されているため２次元→１次元に変換する
+                cells[num].value = v
+            except Exception as e:
+                print(e)
+                pass
 
-# def write_url_data(data):
-#     ## 先頭行(見出し)の削除
-#     del data[0]
+    worksheet.update_cells(cells)
+    return True
 
-#     ## 接続情報
-#     jsonKey = 'testspreadsheet-302003-fb8fe37d15e6.json'
-#     file = 'testspreadsheet'
 
-#     # 必要データ取得
-#     workSheet1 = connect_to(jsonKey, file, 1)
-#     keyword_data = workSheet1.get_all_values()
-#     workSheet0 = connect_to(jsonKey, file, 0)
-#     url_data = workSheet0.get_all_values()
-#     last_row = len(url_data)
+def bulk_update_row2(worksheet, datas:list, begin_row:int, value_input_option='USER_ENTERED'):
+    '''
+    listを指定してスプレッドシートを一括更新
+    '''
+    # list-dictから、dict-listに変換
+    try:
+        data_dict = {}
+        for data in datas:
+            for key,value in data.items():
+                if key not in data_dict:
+                    data_dict[key] = []
+                data_dict[key].append(value)
 
-#     # 重複チェック
-#     for datum in url_data:
-#         if datum[3] == data[0][0]:
-#             print(" すでにそのurlは検索済みです ")
-#             return
+        headers = init_fetch_sheet_header(worksheet)
+        
+        # データをカラム毎のlist化して、カラム単位でupdateする
+        # 全てのカラムを一括でupdateしてしまうと、想定外のセルがクリアされてしまう場合があるため
+        for key,value_list in data_dict.items():
+            col_num = headers.index(key)
+            cells = worksheet.range(begin_row, col_num + 1, len(data_dict[key]) + begin_row -1 , col_num + 1)
+            for row,data in enumerate(value_list):
+                try:
+                    cells[row].value = data
+                except Exception as e:
+                    print(e)
+                    pass
+            worksheet.update_cells(cells, value_input_option=value_input_option)
+    except Exception as e:
+        print(e.args[0].get('code') == 429)
+        if e.args[0].get('code') == 429:
+            raise Exception("スプレッドシート更新回数の上限です")
+        else:
+            raise Exception("スプレッドシート更新エラー")
+            
+    return True 
 
-#     # データ形成
-#     data_index = last_row
-#     url = data[0][0]
-#     authority = ""
-#     for datum in keyword_data:
-#         if url == datum[3]:
-#             authority = datum[5]
-#     now = now_time()
 
-#     ## データの変更
-#     ## [url, title, キーワード, Vol, ポジション, 流入見込み, SD]から
-#     ## [no, domain(url), Authority, キーワード, Vol, position, 流入見込, SD]へ
-#     formatted_data = []
-#     for datum in data:
-#         formatted_data.append([str(data_index), datum[0], authority, datum[2], datum[3], datum[4], datum[5], datum[6], now])
-#         data_index += 1
+def init_fetch_sheet_header(worksheet):
+    '''
+    ２行目をシステム用がカラムを判別するのに使用する運用のため
+    '''
+    df = pd.DataFrame(worksheet.get_all_values())
+    return list(df.loc[0,:]) # 1行目をシステム用のヘッダとする
 
-#     ## 書き込むcellの計算
-#     area = calculate_area(last_row, formatted_data)
-    
-#     # 書き込み
-#     write(workSheet0, area, formatted_data)
 
-# ## _/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/_/
+def get_last_row(worksheet):
+    '''
+    最終行の取得
+    '''
+    return len(worksheet.get_all_values())
+           
 
-# def write_keyword_data(data):
-
-#     # 接続、必要データ取得
-#     jsonKey = 'testspreadsheet-302003-fb8fe37d15e6.json'
-#     file = 'testspreadsheet'
-#     workSheet1 = connect_to(jsonKey, file, 1)
-#     keyword_data = workSheet1.get_all_values()
-#     last_row = len(keyword_data)
-
-#     # 重複チェック
-#     for datum in keyword_data:
-#         if datum[2] == data[0][0]:
-#             print(" same keyword exists")
-#             return
-
-#     # データの形成
-#     data_index = last_row
-#     url_research = "未"
-#     ## data = [keyword, counter, domain, title, authority] を
-#     ## [number, keyword, counter, domain title, authority, url_research]
-#     now = now_time()
-#     formatted_data = []
-#     for datum in data:
-#         formatted_data.append([str(data_index), datum[0], datum[1], datum[2], datum[3], datum[4], datum[5], now, url_research])
-#         data_index += 1
-
-#     ## 書き込むcellの計算
-#     area = calculate_area(last_row, formatted_data)
-    
-#     # 書き込み
-#     write(workSheet1, area, formatted_data)
-
-# main処理
-def main():
-    print("main")
-
-# 直接起動された場合はmain()を起動(モジュールとして呼び出された場合は起動しないようにするため)
 if __name__ == "__main__":
     main()
